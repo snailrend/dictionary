@@ -1,10 +1,36 @@
 plugins {
     id 'java'
+    id 'java-library'
+    id 'maven-publish'
 }
 
-group 'com.haiyan.framework.dictionary'
+group 'io.github.snailrend.dictionary'
 version '1.0-SNAPSHOT'
+java {
+    withSourcesJar()
+}
+publishing {
+    publications {
+        myLibrary(MavenPublication) {
+            from components.java
+        }
+    }
 
+    repositories {
+        maven {
+            name = "OSSRH"
+            if (project.version.toString().endsWith("-SNAPSHOT")) {
+                url = "https://s01.oss.sonatype.org/content/repositories/snapshots"
+            } else {
+                url = "https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/"
+            }
+            credentials {
+                username = findProperty("ossrhUsername") ?: System.getenv("OSSRH_USERNAME")
+                password = findProperty("ossrhPassword") ?: System.getenv("OSSRH_PASSWORD")
+            }
+        }
+    }
+}
 repositories {
     mavenCentral()
 }
