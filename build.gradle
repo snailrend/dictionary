@@ -1,18 +1,55 @@
 plugins {
     id 'java'
+    id 'signing'
     id 'java-library'
     id 'maven-publish'
 }
 
 group 'io.github.snailrend.dictionary'
-version '1.0-SNAPSHOT'
+version '1.0.0'
 java {
+    withJavadocJar()
     withSourcesJar()
+}
+
+javadoc {
+    options.addStringOption("charset", "UTF-8")
+    if (JavaVersion.current().isJava9Compatible()) {
+        options.addBooleanOption('html5', true)
+    }
+
+}
+allprojects {
+    tasks.withType(Javadoc).all { enabled = false }
 }
 publishing {
     publications {
-        myLibrary(MavenPublication) {
+        mavenJava(MavenPublication) {
+            artifactId = 'dictionary'
             from components.java
+            pom {
+                name = 'dictionary'
+                description = '字典与状态码的翻译'
+                url = 'https://github.com/snailrend/dictionary'
+                licenses {
+                    license {
+                        name = 'MIT'
+                        url = 'https://github.com/snailrend/dictionary/blob/master/LICENSE'
+                    }
+                }
+                developers {
+                    developer {
+                        id = 'snailrend'
+                        name = 'snailrend'
+                        email = 'snailrend@163.co,'
+                    }
+                }
+                scm {
+                    connection = 'scm:git:git://github.com/snailrend/dictionary.git'
+                    developerConnection = 'scm:git:ssh://github.com/snailrend/dictionary.git'
+                    url = 'https://github.com/snailrend/dictionary'
+                }
+            }
         }
     }
 
@@ -30,6 +67,9 @@ publishing {
             }
         }
     }
+}
+signing {
+    sign(publishing.publications.mavenJava)
 }
 repositories {
     mavenCentral()

@@ -20,7 +20,7 @@
 <dependency>
   <groupId>io.github.snailrend.dictionary</groupId>
   <artifactId>dictionary</artifactId>
-  <version>1.0-SNAPSHOT</version>
+  <version>1.0.0</version>
 </dependency>
 ```
 
