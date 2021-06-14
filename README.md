@@ -16,7 +16,13 @@
 ## 快速开始
 
 ### 导入依赖
-
+```xml
+<dependency>
+  <groupId>io.github.snailrend.dictionary</groupId>
+  <artifactId>dictionary</artifactId>
+  <version>1.0-SNAPSHOT</version>
+</dependency>
+```
 
 ### 编写枚举类
 ```java
@@ -109,8 +115,8 @@ class DictionaryConvertManagerTest {
 }
 ```
 
-### 扩展
-#### 外部字典数据
+## 扩展
+### 外部字典数据
 也可以在创建`DictionaryConvertManager`时注册外部的字典数据：
 ```java
 //如果是在 Spring 环境，可以将此对象注册为 Bean
@@ -118,7 +124,7 @@ DictionaryConvertManager dictionaryConvertManager = new DictionaryConvertManager
     return loadData(dictionaryName, loaderParams);
 });
 ```
-#### 深层次翻译
+### 深层次翻译
 当字段类型对应的类上有标记`@DictionaryConvertible`注解时，此字段的值若是非空，也会对值对象中的字段进行翻译
 ```java
 
@@ -158,7 +164,56 @@ public class DeepDictionaryVo {
 }
 
 ```
-#### 翻译多个字典值
+### 字典项名称翻译为字典项值
+```java
+public class SingleNameToValueDictionaryVo {
+    @Dictionary(dictionaryEnum = Level.class,convertType = ConvertType.NAME_TO_VALUE)
+    private String levelOwn;
+    @Dictionary(dictionaryEnum = Level.class,toField = "levelName",convertType = ConvertType.NAME_TO_VALUE)
+    private String level;
+    private String levelName;
+
+
+    public String getLevelOwn() {
+        return levelOwn;
+    }
+
+    public void setLevelOwn(String levelOwn) {
+        this.levelOwn = levelOwn;
+    }
+
+    public String getLevel() {
+        return level;
+    }
+
+    public void setLevel(String level) {
+        this.level = level;
+    }
+
+    public String getLevelName() {
+        return levelName;
+    }
+
+    public void setLevelName(String levelName) {
+        this.levelName = levelName;
+    }
+}
+
+class DictionaryConvertManagerTest {
+
+    @Test
+    void testConvert11() {
+        SingleNameToValueDictionaryVo singleDictionaryVo = new SingleNameToValueDictionaryVo();
+        singleDictionaryVo.setLevelOwn(Level.one.getName());
+        singleDictionaryVo.setLevel(Level.two.getName());
+        dictionaryConvertManagerUnderTest.convert(singleDictionaryVo);
+        Assertions.assertEquals("1", singleDictionaryVo.getLevelOwn());
+        Assertions.assertEquals("2", singleDictionaryVo.getLevelName());
+        Assertions.assertEquals("二", singleDictionaryVo.getLevel());
+    }
+}
+```
+### 翻译多个字典值
 ```java
 public class MultipleDictionaryVo {
     @Dictionary(dictionaryEnum = Level.class, valueDelimiter = ",")
@@ -205,7 +260,7 @@ class DictionaryConvertManagerTest {
     }
 }
 ```
-#### 翻译多个字典项名称为字典值
+### 翻译多个字典项名称为字典值
 ```java
 
 public class MultipleNameToValueDictionaryVo {
@@ -251,6 +306,56 @@ class DictionaryConvertManagerTest {
         Assertions.assertEquals("1,2", singleDictionaryVo.getLevelOwn());
         Assertions.assertEquals("3,4", singleDictionaryVo.getLevelName());
         Assertions.assertEquals("三,四", singleDictionaryVo.getLevel());
+    }
+}
+```
+
+### 将字典值翻译成字典项实例
+```java
+
+public class SingleDictionaryItemVo {
+    @Dictionary(dictionaryEnum = Level.class)
+    private DictionaryItem levelOwn;
+    @Dictionary(dictionaryEnum = Level.class,toField = "levelName")
+    private String level;
+    private DictionaryItem levelName;
+
+    public DictionaryItem getLevelOwn() {
+        return levelOwn;
+    }
+
+    public void setLevelOwn(DictionaryItem levelOwn) {
+        this.levelOwn = levelOwn;
+    }
+
+    public String getLevel() {
+        return level;
+    }
+
+    public void setLevel(String level) {
+        this.level = level;
+    }
+
+    public DictionaryItem getLevelName() {
+        return levelName;
+    }
+
+    public void setLevelName(DictionaryItem levelName) {
+        this.levelName = levelName;
+    }
+}
+
+class DictionaryConvertManagerTest {
+    @Test
+    void testConvert15() {
+        SingleDictionaryItemVo singleDictionaryVo = new SingleDictionaryItemVo();
+        singleDictionaryVo.setLevelOwn(new SimpleDictionaryItem("1"));
+        singleDictionaryVo.setLevel("2");
+        dictionaryConvertManagerUnderTest.convert(singleDictionaryVo);
+        Assertions.assertEquals("1", singleDictionaryVo.getLevelOwn().getValue());
+        Assertions.assertEquals("一", singleDictionaryVo.getLevelOwn().getName());
+        Assertions.assertEquals("2", singleDictionaryVo.getLevelName().getValue());
+        Assertions.assertEquals("二", singleDictionaryVo.getLevelName().getName());
     }
 }
 ```
